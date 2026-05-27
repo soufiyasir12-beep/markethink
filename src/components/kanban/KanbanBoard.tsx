@@ -1,8 +1,10 @@
 'use client'
 
-import { DndContext, DragEndEvent, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
+import { useState } from 'react'
+import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
 import { Campaign } from '@/types/database'
 import KanbanColumn from './KanbanColumn'
+import CampaignCard from './CampaignCard'
 
 interface KanbanBoardProps {
   campaigns: Campaign[]
@@ -11,11 +13,14 @@ interface KanbanBoardProps {
 }
 
 export default function KanbanBoard({ campaigns, onSelectCampaign, onUpdateStatus }: KanbanBoardProps) {
-  // Sensor for handling dragging and clicks gracefully
+  const [activeDragId, setActiveDragId] = useState<string | null>(null)
+
+  // Sensor: distance:10 means the pointer must move 10px before drag activates.
+  // A normal click (< 10px movement) will NOT activate drag, so onClick fires cleanly.
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 10,
       },
     })
   )
@@ -38,8 +43,14 @@ export default function KanbanBoard({ campaigns, onSelectCampaign, onUpdateStatu
     },
   ]
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveDragId(event.active.id as string)
+  }
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
+    setActiveDragId(null)
+
     if (!over) return
 
     const campaignId = active.id as string
@@ -51,8 +62,19 @@ export default function KanbanBoard({ campaigns, onSelectCampaign, onUpdateStatu
     }
   }
 
+  const handleDragCancel = () => {
+    setActiveDragId(null)
+  }
+
+  const activeCampaign = activeDragId ? campaigns.find((c) => c.id === activeDragId) : null
+
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-8 h-full items-start overflow-y-auto select-none">
         {columns.map((col) => {
           const colCampaigns = campaigns.filter((c) => c.status === col.id)
@@ -68,6 +90,13 @@ export default function KanbanBoard({ campaigns, onSelectCampaign, onUpdateStatu
           )
         })}
       </div>
+
+      {/* DragOverlay renders in a portal — outside all overflow:hidden containers */}
+      <DragOverlay dropAnimation={{ duration: 200, easing: 'ease' }}>
+        {activeCampaign ? (
+          <CampaignCard campaign={activeCampaign} onSelectCampaign={() => {}} isDragOverlay />
+        ) : null}
+      </DragOverlay>
     </DndContext>
   )
 }
