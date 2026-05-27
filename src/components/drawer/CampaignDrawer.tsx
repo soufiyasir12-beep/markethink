@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Campaign, MarketingAsset } from '@/types/database'
 import { motion, AnimatePresence } from 'framer-motion'
 import AssetCard from './AssetCard'
@@ -11,6 +12,8 @@ interface CampaignDrawerProps {
   onUpdateStatus: (id: string, status: 'pending_review' | 'approved' | 'published') => void
   onUpdateAssetCopy: (assetId: string, campaignId: string, newCopy: string) => Promise<boolean>
   onPreviewAsset: (asset: MarketingAsset) => void
+  onDeleteCampaign: (id: string) => Promise<void>
+  onDeleteAsset: (id: string) => Promise<void>
 }
 
 export default function CampaignDrawer({
@@ -20,7 +23,11 @@ export default function CampaignDrawer({
   onUpdateStatus,
   onUpdateAssetCopy,
   onPreviewAsset,
+  onDeleteCampaign,
+  onDeleteAsset,
 }: CampaignDrawerProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
   if (!campaign) return null
 
   return (
@@ -46,31 +53,72 @@ export default function CampaignDrawer({
           >
             {/* Drawer Header */}
             <div className="p-6 border-b border-slate-200 flex items-center justify-between min-h-[73px]">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] font-bold uppercase rounded-full tracking-wider">
-                    {campaign.brand_name}
+              {showDeleteConfirm ? (
+                <div className="flex items-center justify-between w-full animate-fade-in">
+                  <span className="text-xs font-bold text-red-600 flex items-center gap-1.5">
+                    <svg className="w-4.5 h-4.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    ¿Eliminar esta campaña y todos sus recursos?
                   </span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                    campaign.status === 'published'
-                      ? 'bg-blue-50 border-blue-100 text-blue-700'
-                      : campaign.status === 'approved'
-                      ? 'bg-emerald-50 border-emerald-100 text-emerald-700'
-                      : 'bg-amber-50 border-amber-100 text-amber-700'
-                  }`}>
-                    {campaign.status.replace('_', ' ')}
-                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="py-1.5 px-3 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await onDeleteCampaign(campaign.id)
+                        setShowDeleteConfirm(false)
+                      }}
+                      className="py-1.5 px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                    >
+                      Sí, eliminar
+                    </button>
+                  </div>
                 </div>
-                <h2 className="text-lg font-bold text-slate-800 tracking-tight mt-1">{campaign.title}</h2>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-1.5 hover:bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition-all cursor-pointer"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              ) : (
+                <>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] font-bold uppercase rounded-full tracking-wider">
+                        {campaign.brand_name}
+                      </span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                        campaign.status === 'published'
+                          ? 'bg-blue-50 border-blue-100 text-blue-700'
+                          : campaign.status === 'approved'
+                          ? 'bg-emerald-50 border-emerald-100 text-emerald-700'
+                          : 'bg-amber-50 border-amber-100 text-amber-700'
+                      }`}>
+                        {campaign.status.replace('_', ' ')}
+                      </span>
+                    </div>
+                    <h2 className="text-lg font-bold text-slate-800 tracking-tight mt-1">{campaign.title}</h2>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="p-1.5 hover:bg-red-50 border border-slate-200 hover:border-red-100 rounded-lg text-slate-400 hover:text-red-600 transition-all cursor-pointer"
+                      title="Eliminar Campaña"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={onClose}
+                      className="p-1.5 hover:bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition-all cursor-pointer"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Drawer Scrollable Content */}
@@ -101,6 +149,7 @@ export default function CampaignDrawer({
                         asset={asset}
                         onUpdateCopy={(newCopy) => onUpdateAssetCopy(asset.id, campaign.id, newCopy)}
                         onPreview={() => onPreviewAsset(asset)}
+                        onDeleteAsset={onDeleteAsset}
                       />
                     ))}
                   </div>

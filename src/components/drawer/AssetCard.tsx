@@ -8,12 +8,14 @@ interface AssetCardProps {
   asset: MarketingAsset
   onUpdateCopy: (newCopy: string) => Promise<boolean>
   onPreview: () => void
+  onDeleteAsset: (id: string) => Promise<void>
 }
 
-export default function AssetCard({ asset, onUpdateCopy, onPreview }: AssetCardProps) {
+export default function AssetCard({ asset, onUpdateCopy, onPreview, onDeleteAsset }: AssetCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [copyText, setCopyText] = useState(asset.copy_text || '')
   const [saving, setSaving] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleSave = async () => {
     setSaving(true)
@@ -74,25 +76,66 @@ export default function AssetCard({ asset, onUpdateCopy, onPreview }: AssetCardP
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden flex flex-col hover:border-slate-300 transition-colors">
       {/* Title & Icon Header */}
-      <div className="p-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-white rounded-lg shadow-2xs border border-slate-200/50">
-            {getAssetIcon(asset.asset_type)}
-          </div>
-          <div>
-            <h4 className="font-bold text-slate-800 text-sm tracking-tight">{asset.title || 'Recurso sin título'}</h4>
-            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">
-              {getAssetTypeName(asset.asset_type)}
+      <div className="p-4 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between min-h-[62px]">
+        {showDeleteConfirm ? (
+          <div className="flex items-center justify-between w-full animate-fade-in">
+            <span className="text-xs font-bold text-red-600 flex items-center gap-1">
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              ¿Eliminar recurso?
             </span>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="py-1 px-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 rounded-md text-[10px] font-semibold cursor-pointer transition-colors"
+              >
+                No
+              </button>
+              <button
+                onClick={async () => {
+                  await onDeleteAsset(asset.id)
+                  setShowDeleteConfirm(false)
+                }}
+                className="py-1 px-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-[10px] font-semibold cursor-pointer transition-colors"
+              >
+                Sí
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-white rounded-lg shadow-2xs border border-slate-200/50">
+                {getAssetIcon(asset.asset_type)}
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-800 text-sm tracking-tight">{asset.title || 'Recurso sin título'}</h4>
+                <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">
+                  {getAssetTypeName(asset.asset_type)}
+                </span>
+              </div>
+            </div>
 
-        <button
-          onClick={onPreview}
-          className="py-1.5 px-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
-        >
-          Previsualizar
-        </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onPreview}
+                className="py-1.5 px-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+              >
+                Previsualizar
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="p-1.5 bg-white hover:bg-red-50 border border-slate-200 hover:border-red-100 text-slate-400 hover:text-red-600 rounded-lg cursor-pointer transition-all flex items-center justify-center"
+                title="Eliminar recurso"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Copy Text Editor */}

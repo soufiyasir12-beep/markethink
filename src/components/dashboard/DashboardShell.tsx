@@ -21,6 +21,7 @@ export default function DashboardShell({ initialCampaigns, userEmail }: Dashboar
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false)
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null)
   const [previewAsset, setPreviewAsset] = useState<MarketingAsset | null>(null)
+  const [confirmDeleteAssetId, setConfirmDeleteAssetId] = useState<string | null>(null)
 
   const supabase = createClient()
 
@@ -164,6 +165,46 @@ export default function DashboardShell({ initialCampaigns, userEmail }: Dashboar
     }
   }
 
+  // Delete campaign
+  const handleDeleteCampaign = async (campaignId: string) => {
+    setSelectedCampaignId(null)
+
+    const { error } = await supabase
+      .from('campaigns')
+      .delete()
+      .eq('id', campaignId)
+
+    if (error) {
+      toast.error('Error al eliminar campaña: ' + error.message)
+    } else {
+      setCampaigns((prev) => prev.filter((c) => c.id !== campaignId))
+      toast.success('Campaña eliminada correctamente')
+    }
+  }
+
+  // Delete asset
+  const handleDeleteAsset = async (assetId: string) => {
+    const { error } = await supabase
+      .from('marketing_assets')
+      .delete()
+      .eq('id', assetId)
+
+    if (error) {
+      toast.error('Error al eliminar recurso: ' + error.message)
+    } else {
+      setCampaigns((prev) =>
+        prev.map((c) => {
+          const assets = c.marketing_assets || []
+          return {
+            ...c,
+            marketing_assets: assets.filter((a) => a.id !== assetId),
+          }
+        })
+      )
+      toast.success('Recurso eliminado correctamente')
+    }
+  }
+
   const renderContent = () => {
     switch (currentTab) {
       case 'kanban':
@@ -265,21 +306,53 @@ export default function DashboardShell({ initialCampaigns, userEmail }: Dashboar
                         {asset.copy_text || 'Sin copy generado.'}
                       </p>
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => setPreviewAsset(asset)}
-                          className="flex-1 py-2 px-3 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
-                        >
-                          Previsualizar
-                        </button>
-                        {asset.vercel_url && (
-                          <a
-                            href={asset.vercel_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="py-2 px-3 bg-slate-900 text-white hover:bg-slate-800 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
-                          >
-                            Visitar Sitio
-                          </a>
+                        {confirmDeleteAssetId === asset.id ? (
+                          <div className="flex-1 flex gap-2 items-center bg-red-50/50 border border-red-200 rounded-xl p-2 animate-fade-in w-full">
+                            <span className="text-[10px] font-bold text-red-600 flex-1 px-1">¿Eliminar recurso?</span>
+                            <button
+                              onClick={() => setConfirmDeleteAssetId(null)}
+                              className="py-1 px-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 rounded-lg text-[10px] font-semibold cursor-pointer transition-colors"
+                            >
+                              No
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleDeleteAsset(asset.id)
+                                setConfirmDeleteAssetId(null)
+                              }}
+                              className="py-1 px-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-semibold cursor-pointer transition-colors"
+                            >
+                              Sí
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => setPreviewAsset(asset)}
+                              className="flex-1 py-2 px-3 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+                            >
+                              Previsualizar
+                            </button>
+                            {asset.vercel_url && (
+                              <a
+                                href={asset.vercel_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="py-2 px-3 bg-slate-900 text-white hover:bg-slate-800 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+                              >
+                                Visitar Sitio
+                              </a>
+                            )}
+                            <button
+                              onClick={() => setConfirmDeleteAssetId(asset.id)}
+                              className="p-2 border border-slate-200 hover:border-red-200 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded-xl cursor-pointer transition-all flex items-center justify-center"
+                              title="Eliminar recurso"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -361,6 +434,8 @@ export default function DashboardShell({ initialCampaigns, userEmail }: Dashboar
         onUpdateStatus={handleUpdateCampaignStatus}
         onUpdateAssetCopy={handleUpdateAssetCopy}
         onPreviewAsset={setPreviewAsset}
+        onDeleteCampaign={handleDeleteCampaign}
+        onDeleteAsset={handleDeleteAsset}
       />
 
       {/* Preview Modal */}
