@@ -389,23 +389,7 @@ export default function DashboardShell({ initialCampaigns, userEmail }: Dashboar
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
-              <h3 className="text-lg font-bold text-slate-900">Configuración del Agente de Marketing</h3>
-              <p className="text-sm text-slate-500 font-medium">
-                Para que el orquestador o agente externo inserte automáticamente campañas y assets en la plataforma, configura tu agente con los siguientes endpoints e inserta registros directamente usando la <code className="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600">service_role</code> key.
-              </p>
-              <div className="bg-slate-900 rounded-xl p-5 text-xs text-emerald-400 font-mono overflow-x-auto space-y-2">
-                <div># Ejemplo de inserción en NodeJS / Python</div>
-                <div>{`const { createClient } = require('@supabase/supabase-js')`}</div>
-                <div>{`const supabase = createClient('https://iiqnfmagxwbofgwkuopa.supabase.co', SERVICE_ROLE_KEY)`}</div>
-                <div className="text-slate-400 mt-2">// Insertar campaña</div>
-                <div>{`const { data: campaign } = await supabase.from('campaigns').insert({`}</div>
-                <div>{`  title: 'Campaña CyberMonday 2026',`}</div>
-                <div>{`  brand_name: 'SuperTech',`}</div>
-                <div>{`  briefing: 'Campaña con enfoque tecnológico...'`}</div>
-                <div>{`}).select().single()`}</div>
-              </div>
-            </div>
+
           </div>
         )
       default:
