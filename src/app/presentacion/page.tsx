@@ -37,13 +37,14 @@ function Badge({ children, color = 'purple', onClick }: { children: React.ReactN
   )
 }
 
-function FeatureCard({ icon, title, desc, delay = 0 }: { icon: string; title: string; desc: string; delay?: number }) {
+function FeatureCard({ icon, title, desc, delay = 0, onClick }: { icon: string; title: string; desc: string; delay?: number; onClick?: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 hover:border-purple-500/40 transition-colors"
+      onClick={onClick}
+      className={`rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 hover:border-purple-500/40 transition-colors ${onClick ? 'cursor-pointer hover:bg-white/10' : ''}`}
     >
       <span className="text-3xl">{icon}</span>
       <h3 className="mt-3 text-lg font-bold text-white">{title}</h3>
@@ -52,13 +53,14 @@ function FeatureCard({ icon, title, desc, delay = 0 }: { icon: string; title: st
   )
 }
 
-function TimelineStep({ step, title, desc, delay = 0 }: { step: string; title: string; desc: string; delay?: number }) {
+function TimelineStep({ step, title, desc, delay = 0, onClick }: { step: string; title: string; desc: string; delay?: number; onClick?: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, x: -30 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay, duration: 0.5 }}
-      className="flex gap-4"
+      onClick={onClick}
+      className={`flex gap-4 p-2 rounded-xl transition-all duration-200 ${onClick ? 'cursor-pointer hover:bg-white/5 hover:translate-x-1' : ''}`}
     >
       <div className="flex flex-col items-center">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-blue-500 text-sm font-bold text-white">
@@ -90,13 +92,14 @@ function StatCard({ value, label, delay = 0 }: { value: string; label: string; d
   )
 }
 
-function SecurityItem({ icon, title, desc, delay = 0 }: { icon: string; title: string; desc: string; delay?: number }) {
+function SecurityItem({ icon, title, desc, delay = 0, onClick }: { icon: string; title: string; desc: string; delay?: number; onClick?: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4"
+      onClick={onClick}
+      className={`flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 transition-all duration-200 ${onClick ? 'cursor-pointer hover:bg-emerald-500/10 hover:border-emerald-500/40' : ''}`}
     >
       <span className="text-2xl">{icon}</span>
       <div>
@@ -127,7 +130,7 @@ function TableRow({ cells, header = false, delay = 0, onClick }: { cells: string
 }
 
 /* ─────────── SLIDES definition ─────────── */
-function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slide[] {
+function useSlides({ onTailscaleClick, onDockerClick }: { onTailscaleClick: () => void; onDockerClick: () => void }): Slide[] {
   return [
     /* 0 ─ PORTADA */
     {
@@ -327,7 +330,13 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
           <FeatureCard icon="🗄️" title="Supabase (PostgreSQL)" desc="Base de datos relacional con Auth, RLS (Row Level Security), suscripción WebSocket en tiempo real." delay={0.1} />
           <FeatureCard icon="🤖" title="OpenClaw" desc="Framework agéntico open-source. Sandbox seguro con acceso a Bash/Node.js. Skills programables en JavaScript." delay={0.2} />
           <FeatureCard icon="☁️" title="Google Cloud Platform" desc="Vertex AI (Gemini 3.1 Flash-Image, Veo 3.1), Cloud TTS para clonación de voz. Autenticación ADC." delay={0.3} />
-          <FeatureCard icon="🐳" title="Docker Engine" desc="Contenerización del agente. docker-compose.yml con network_mode:host y volúmenes persistentes." delay={0.4} />
+          <FeatureCard 
+            icon="🐳" 
+            title="Docker Engine 🔍" 
+            desc="Contenerización del agente. docker-compose.yml con network_mode:host. (Clic para ver compose)" 
+            delay={0.4} 
+            onClick={onDockerClick}
+          />
           <FeatureCard icon="🚀" title="Vercel + GitHub" desc="Despliegue GitOps automatizado. Cada commit en main dispara un deploy al Edge CDN. Latencia < 2s." delay={0.5} />
           <FeatureCard icon="📱" title="Telegram Bot API" desc="Canal de comunicación con el cliente. Webhook directo al agente OpenClaw para prompting natural." delay={0.6} />
           <FeatureCard icon="📂" title="Google Drive API" desc="Persistencia multimedia en la nube. Backup automático de imágenes y vídeos generados por la IA." delay={0.7} />
@@ -340,7 +349,7 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
     {
       id: 'servicios',
       title: 'Servicios Instalados',
-      subtitle: 'Infraestructura del servidor (haz clic en Tailscale para ver panel)',
+      subtitle: 'Infraestructura del servidor (haz clic en Tailscale o Docker para ver configuración)',
       content: (
         <div className="space-y-4 max-w-4xl mx-auto">
           <div className="overflow-x-auto rounded-xl border border-white/10">
@@ -350,7 +359,11 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
               </thead>
               <tbody>
                 <TableRow delay={0.1} cells={['🐧 Ubuntu Server', '24.04 LTS', 'Sistema operativo del host en Proxmox']} />
-                <TableRow delay={0.15} cells={['🐳 Docker Engine', 'v26.1', 'Contenerización del agente OpenClaw']} />
+                <TableRow 
+                  delay={0.15} 
+                  cells={['🐳 Docker Engine 🔍', 'v26.1 (Clic para ver compose)', 'Contenerización del agente OpenClaw']} 
+                  onClick={onDockerClick}
+                />
                 <TableRow delay={0.2} cells={['🤖 OpenClaw', '2026.5.27', 'Framework agéntico de IA con sandbox']} />
                 <TableRow 
                   delay={0.25} 
@@ -373,7 +386,7 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
             className="flex flex-wrap gap-2 justify-center"
           >
             <Badge color="green" onClick={onTailscaleClick}>Tailscale — VPN SSH remoto 🔍</Badge>
-            <Badge color="blue">Docker — Sandbox aislado</Badge>
+            <Badge color="blue" onClick={onDockerClick}>Docker — Sandbox aislado 🔍</Badge>
             <Badge color="purple">OpenClaw — Orquestador IA</Badge>
             <Badge color="amber">Proxmox — Hipervisor</Badge>
           </motion.div>
@@ -536,7 +549,7 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
     {
       id: 'diario-infra',
       title: 'Diario de a Bordo (I)',
-      subtitle: 'Fase de Implementación — Infraestructura Base',
+      subtitle: 'Fase de Implementación — Infraestructura Base (haz clic en Docker para ver compose)',
       content: (
         <div className="space-y-5 max-w-4xl mx-auto">
           <motion.p
@@ -568,9 +581,10 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
             />
             <TimelineStep
               step="4"
-              title="Contenerización con Docker"
-              desc="docker-compose.yml con network_mode:host. Volumen persistente (~/.openclaw/workspace) para retención de datos y memoria del agente tras reinicios. Arranque: docker compose up -d."
+              title="Contenerización con Docker 🔍"
+              desc="docker-compose.yml con network_mode:host y volumen persistente (~/.openclaw/workspace) para retención de datos. (Clic para ver archivo)"
               delay={0.45}
+              onClick={onDockerClick}
             />
           </div>
 
@@ -581,7 +595,7 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
             className="flex flex-wrap gap-2 justify-center"
           >
             <Badge color="green">Proxmox → Ubuntu 24.04 LTS</Badge>
-            <Badge color="blue">Docker Engine v26.1</Badge>
+            <Badge color="blue" onClick={onDockerClick}>Docker Engine v26.1 🔍</Badge>
             <Badge color="purple">OpenClaw 2026.5.27</Badge>
             <Badge color="cyan">Telegram Bot API</Badge>
           </motion.div>
@@ -724,7 +738,7 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
     {
       id: 'seguridad',
       title: 'Seguridad y Protección de Datos',
-      subtitle: 'Capas de seguridad implementadas',
+      subtitle: 'Capas de seguridad implementadas (haz clic en Docker para ver compose)',
       content: (
         <div className="space-y-6 max-w-4xl mx-auto">
           <motion.div
@@ -743,7 +757,13 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
             <SecurityItem icon="🌐" title="HTTPS + Login cifrado" desc="Acceso seguro al dashboard mediante Supabase Auth (Email/Password) con tokens JWT cifrados." delay={0.2} />
             <SecurityItem icon="🔑" title="Service Role Key (bypass RLS)" desc="El agente IA usa la llave maestra para inserciones server-to-server, sin exponer credenciales en frontend." delay={0.3} />
             <SecurityItem icon="🛡️" title="Tailscale VPN (SSH privado)" desc="Administración 100% remota por túnel VPN privado. SSH por puerto 18789. Sin exposición pública." delay={0.4} />
-            <SecurityItem icon="🐳" title="Docker Sandbox" desc="Agente aislado en contenedor. Volumen persistente de solo lectura para credenciales GCP (:ro)." delay={0.5} />
+            <SecurityItem 
+              icon="🐳" 
+              title="Docker Sandbox 🔍" 
+              desc="Agente aislado en contenedor. (Clic para ver docker-compose.yml)" 
+              delay={0.5} 
+              onClick={onDockerClick}
+            />
             <SecurityItem icon="🔒" title="ADC (Application Default Credentials)" desc="Claves RSA privadas para Vertex AI. Variable GOOGLE_APPLICATION_CREDENTIALS en .env aislado del host Docker." delay={0.6} />
           </div>
         </div>
@@ -1032,9 +1052,11 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
 /* ─────────── Main presentation component ─────────── */
 export default function PresentacionPage() {
   const [tailscaleModalOpen, setTailscaleModalOpen] = useState(false)
+  const [dockerModalOpen, setDockerModalOpen] = useState(false)
 
   const slides = useSlides({
-    onTailscaleClick: () => setTailscaleModalOpen(true)
+    onTailscaleClick: () => setTailscaleModalOpen(true),
+    onDockerClick: () => setDockerModalOpen(true)
   })
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState(0)
@@ -1055,9 +1077,10 @@ export default function PresentacionPage() {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setTailscaleModalOpen(false)
+        setDockerModalOpen(false)
         return
       }
-      if (tailscaleModalOpen) return
+      if (tailscaleModalOpen || dockerModalOpen) return
 
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next() }
       if (e.key === 'ArrowLeft')                    { e.preventDefault(); prev() }
@@ -1066,7 +1089,7 @@ export default function PresentacionPage() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [next, prev, goTo, slides.length, tailscaleModalOpen])
+  }, [next, prev, goTo, slides.length, tailscaleModalOpen, dockerModalOpen])
 
   const slideVariants = {
     enter: (dir: number) => ({ x: dir > 0 ? 600 : -600, opacity: 0 }),
@@ -1228,6 +1251,78 @@ export default function PresentacionPage() {
                   alt="Panel de administración de Tailscale"
                   className="w-full h-auto max-h-[450px] object-contain mx-auto"
                 />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Docker Compose Modal ── */}
+      <AnimatePresence>
+        {dockerModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setDockerModalOpen(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md cursor-pointer"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-3xl w-full rounded-2xl border border-white/10 bg-[#0c0c22] p-6 shadow-2xl cursor-default"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setDockerModalOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5"
+                aria-label="Cerrar modal"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+              
+              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                <span>🐳</span> Configuración de Docker Compose (docker-compose.yml)
+              </h3>
+              <p className="text-sm text-slate-400 mb-4">
+                Configuración del contenedor del agente OpenClaw con acceso privilegiado y modo de red local del host.
+              </p>
+
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-slate-950 p-4 font-mono text-[10px] md:text-xs text-slate-300 overflow-y-auto max-h-[380px] leading-relaxed select-text">
+                <pre className="text-left whitespace-pre-wrap sm:whitespace-pre">
+{`version: '3.8'
+
+services:
+  markethink-agent:
+    image: ghcr.io/openclaw/openclaw:latest
+    container_name: markethink-openclaw
+    restart: unless-stopped
+
+    # Control total del sistema
+    privileged: true
+    user: "root"
+
+    # Red del host para escuchar en tus puertos actuales y usar Tailscale directamente
+    network_mode: "host"
+    pid: "host"
+
+    volumes:
+      # Mapeamos la carpeta actual directamente dentro del contenedor.
+      # Docker usará la configuración actual sin tener que mover ningún archivo de sitio.
+      - ~/.openclaw:/root/.openclaw
+
+      # Mapeo del sistema de archivos de la VM y el socket de Docker
+      - /:/host:rw
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    # Idioma e historial de comandos
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/host/home/administrador/markethink/config/gcp-credentials.json
+      - LANG=es_ES.UTF-8
+      - TZ=Europe/Madrid`}
+                </pre>
               </div>
             </motion.div>
           </motion.div>
