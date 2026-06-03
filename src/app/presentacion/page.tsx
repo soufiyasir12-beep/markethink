@@ -549,7 +549,7 @@ function useSlides({ onTailscaleClick, onDockerClick }: { onTailscaleClick: () =
     {
       id: 'diario-infra',
       title: 'Diario de a Bordo (I)',
-      subtitle: 'Fase de Implementación — Infraestructura Base (haz clic en Docker para ver compose)',
+      subtitle: 'Fase de Implementación — Infraestructura Base (haz clic en Tailscale para ver panel)',
       content: (
         <div className="space-y-5 max-w-4xl mx-auto">
           <motion.p
@@ -581,10 +581,10 @@ function useSlides({ onTailscaleClick, onDockerClick }: { onTailscaleClick: () =
             />
             <TimelineStep
               step="4"
-              title="Contenerización con Docker 🔍"
-              desc="docker-compose.yml con network_mode:host y volumen persistente (~/.openclaw/workspace) para retención de datos. (Clic para ver archivo)"
+              title="Instalación de Tailscale (VPN SSH) 🔍"
+              desc="Túnel VPN privado para administración remota 100% segura. SSH por puerto personalizado 18789. Sin exposición pública. (Clic para ver panel)"
               delay={0.45}
-              onClick={onDockerClick}
+              onClick={onTailscaleClick}
             />
           </div>
 
@@ -595,7 +595,7 @@ function useSlides({ onTailscaleClick, onDockerClick }: { onTailscaleClick: () =
             className="flex flex-wrap gap-2 justify-center"
           >
             <Badge color="green">Proxmox → Ubuntu 24.04 LTS</Badge>
-            <Badge color="blue" onClick={onDockerClick}>Docker Engine v26.1 🔍</Badge>
+            <Badge color="green" onClick={onTailscaleClick}>Tailscale — VPN SSH remoto 🔍</Badge>
             <Badge color="purple">OpenClaw 2026.5.27</Badge>
             <Badge color="cyan">Telegram Bot API</Badge>
           </motion.div>
@@ -607,32 +607,33 @@ function useSlides({ onTailscaleClick, onDockerClick }: { onTailscaleClick: () =
     {
       id: 'diario-cloud',
       title: 'Diario de a Bordo (II)',
-      subtitle: 'Fase de Implementación — Cloud, Skills y Automatización',
+      subtitle: 'Fase de Implementación — Docker, Cloud y Skills (haz clic en Docker para ver compose)',
       content: (
         <div className="space-y-5 max-w-4xl mx-auto">
           <div className="space-y-0">
             <TimelineStep
               step="5"
-              title="Credenciales GCP (Application Default Credentials)"
-              desc="Cuenta de Servicio en IAM con roles Vertex AI User y Cloud TTS Admin. Clave RSA (gcp-credentials.json) montada como volumen :ro en Docker. Variable GOOGLE_APPLICATION_CREDENTIALS inyectada."
+              title="Contenerización con Docker 🔍"
+              desc="docker-compose.yml con network_mode:host y volumen persistente (~/.openclaw/workspace) para retención de datos. (Clic para ver archivo)"
               delay={0}
+              onClick={onDockerClick}
             />
             <TimelineStep
               step="6"
-              title="Desarrollo de Skills Nativas (Node.js)"
-              desc="5 Skills programadas: A) Copywriting + TTS (Audio Tags, voces Fenrir/Sadachbia), B) Generación Gráfica + B-Roll (Vertex AI), C) Ensamblaje FFMPEG (child_process async), D) Landing Pages + GitOps (Google Stitch + R.A.S.D.), E) Persistencia (Drive + Supabase)."
+              title="Credenciales GCP (Application Default Credentials)"
+              desc="Cuenta de Servicio en IAM con roles Vertex AI User y Cloud TTS Admin. Clave RSA (gcp-credentials.json) montada como volumen :ro en Docker. Variable GOOGLE_APPLICATION_CREDENTIALS inyectada."
               delay={0.2}
             />
             <TimelineStep
               step="7"
-              title="Pipeline GitOps Automatizado"
-              desc="Skill D ejecuta: git add index.html && git commit -m 'feat: auto-generation campaign ${id}' && git push origin main. Webhook de Vercel dispara deploy al Edge CDN en <2s."
+              title="Desarrollo de Skills Nativas (Node.js)"
+              desc="5 Skills programadas: A) Copywriting + TTS (Audio Tags, voces Fenrir/Sadachbia), B) Generación Gráfica + B-Roll (Vertex AI), C) Ensamblaje FFMPEG (child_process async), D) Landing Pages + GitOps, E) Persistencia (Drive + Supabase)."
               delay={0.4}
             />
             <TimelineStep
               step="8"
-              title="Persistencia Multimedia (Drive + Supabase)"
-              desc="Upload a Google Drive vía googleapis (fs.createReadStream → POST multipart). Inserción en tabla marketing_assets con Service Role Key (bypass RLS). WebSocket actualiza el dashboard en tiempo real."
+              title="Pipeline GitOps Automatizado"
+              desc="Skill D ejecuta: git add index.html && git commit -m 'feat: auto-generation campaign ${id}' && git push origin main. Webhook de Vercel dispara deploy al Edge CDN en <2s."
               delay={0.6}
             />
           </div>
@@ -644,17 +645,18 @@ function useSlides({ onTailscaleClick, onDockerClick }: { onTailscaleClick: () =
             className="grid grid-cols-2 md:grid-cols-4 gap-3"
           >
             {[
+              { icon: '🐳', label: 'Docker Compose 🔍', click: onDockerClick },
               { icon: '🔑', label: 'ADC + Docker :ro' },
               { icon: '⚡', label: '5 Skills Node.js' },
               { icon: '🚀', label: 'GitOps Pipeline' },
-              { icon: '☁️', label: 'Drive + Supabase' },
             ].map((item, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9 + i * 0.1 }}
-                className="text-center rounded-xl border border-white/10 bg-white/5 p-3"
+                onClick={item.click}
+                className={`text-center rounded-xl border border-white/10 bg-white/5 p-3 ${item.click ? 'cursor-pointer hover:bg-white/10 hover:border-purple-500/30' : ''}`}
               >
                 <span className="text-2xl">{item.icon}</span>
                 <p className="mt-1 text-xs text-slate-400">{item.label}</p>
@@ -669,14 +671,14 @@ function useSlides({ onTailscaleClick, onDockerClick }: { onTailscaleClick: () =
     {
       id: 'diario-web',
       title: 'Diario de a Bordo (III)',
-      subtitle: 'Fase de Implementación — Tailscale VPN y Dashboard Web',
+      subtitle: 'Fase de Implementación — Persistencia y Dashboard Web',
       content: (
         <div className="space-y-5 max-w-4xl mx-auto">
           <div className="space-y-0">
             <TimelineStep
               step="9"
-              title="Instalación de Tailscale (VPN SSH)"
-              desc="Túnel VPN privado para administración remota 100% segura. SSH por puerto personalizado 18789. Sin exposición de puertos públicos. Elimina necesidad de presencia física en el CPD."
+              title="Persistencia Multimedia (Drive + Supabase)"
+              desc="Upload a Google Drive vía googleapis (fs.createReadStream → POST multipart). Inserción en tabla marketing_assets con Service Role Key (bypass RLS). WebSocket actualiza el dashboard en tiempo real."
               delay={0}
             />
             <TimelineStep
@@ -687,15 +689,9 @@ function useSlides({ onTailscaleClick, onDockerClick }: { onTailscaleClick: () =
             />
             <TimelineStep
               step="11"
-              title="Sistema de Tiempo Real (WebSocket)"
-              desc="Suscripción a INSERT/UPDATE/DELETE en campaigns y marketing_assets via Supabase Realtime. Notificaciones Toast automáticas. Preview adaptativo: iframe, img, video HTML5."
-              delay={0.4}
-            />
-            <TimelineStep
-              step="12"
               title="Resolución de Incidencias Críticas"
-              desc="Conflicto versiones OpenClaw (ingeniería inversa en openclaw.json), bloqueo RLS → Service Role Key, latencia 30s → <4s escalando VM a 2 CPUs + 4 GB RAM."
-              delay={0.6}
+              desc="Conflicto versiones OpenClaw (ingeniería inversa en openclaw.json), bloqueo RLS → Service Role Key, latencia 30s → <4s escalando VM a 2 CPUs + 4 GB RAM en Proxmox."
+              delay={0.4}
             />
           </div>
 
@@ -709,7 +705,7 @@ function useSlides({ onTailscaleClick, onDockerClick }: { onTailscaleClick: () =
               🎯 Resultado: Sistema completo operativo — del prompt en Telegram a la producción en Vercel
             </p>
             <p className="text-xs text-slate-400 mt-1">
-              12 pasos técnicos documentados · 5 Skills · 3 capas de seguridad · Deploy automático
+              11 pasos técnicos documentados · 5 Skills · 3 capas de seguridad · Deploy automático
             </p>
           </motion.div>
         </div>
