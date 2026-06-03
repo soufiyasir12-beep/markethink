@@ -20,6 +20,8 @@ const getAssetBadgeColor = (type: string) => {
       return 'bg-amber-50 text-amber-700 border-amber-100'
     case 'yt_long':
       return 'bg-red-50 text-red-700 border-red-100'
+    case 'video':
+      return 'bg-sky-50 text-sky-700 border-sky-100'
     default:
       return 'bg-slate-50 text-slate-700 border-slate-100'
   }
@@ -35,6 +37,8 @@ const getAssetLabel = (type: string) => {
       return 'Banner'
     case 'yt_long':
       return 'YouTube'
+    case 'video':
+      return 'Video'
     default:
       return type
   }

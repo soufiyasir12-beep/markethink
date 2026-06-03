@@ -11,7 +11,7 @@ export interface Campaign {
 export interface MarketingAsset {
   id: string
   campaign_id: string
-  asset_type: 'landing_page' | 'reel_vertical' | 'banner' | 'yt_long'
+  asset_type: 'landing_page' | 'reel_vertical' | 'banner' | 'yt_long' | 'video' | 'image' | 'audio'
   title: string | null
   copy_text: string | null
   drive_url: string | null

@@ -36,12 +36,13 @@ export function getDriveImageUrl(driveUrl: string): string {
 }
 
 /**
- * Converts a Google Drive link to a direct video download/streaming URL.
+ * Converts a Google Drive link to an embeddable video preview URL.
+ * Uses the /file/d/ID/preview endpoint which works reliably in iframes.
  */
 export function getDriveVideoUrl(driveUrl: string): string {
   const id = extractDriveFileId(driveUrl)
   if (id) {
-    return `https://docs.google.com/uc?export=download&id=${id}`
+    return `https://drive.google.com/file/d/${id}/preview`
   }
   return driveUrl
 }

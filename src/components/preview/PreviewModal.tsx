@@ -23,6 +23,8 @@ export default function PreviewModal({ asset, isOpen, onClose }: PreviewModalPro
         return 'Banner Publicitario'
       case 'yt_long':
         return 'Video de YouTube'
+      case 'video':
+        return 'Video'
       default:
         return type
     }
@@ -69,6 +71,7 @@ export default function PreviewModal({ asset, isOpen, onClose }: PreviewModalPro
         )
       case 'reel_vertical':
       case 'yt_long':
+      case 'video':
         if (!asset.drive_url) {
           return (
             <div className="flex flex-col items-center justify-center p-12 text-slate-400 font-semibold text-sm">
@@ -79,12 +82,13 @@ export default function PreviewModal({ asset, isOpen, onClose }: PreviewModalPro
         const isReel = asset.asset_type === 'reel_vertical'
         return (
           <div className="flex items-center justify-center w-full h-full p-6 bg-slate-950">
-            <video
+            <iframe
               src={getDriveVideoUrl(asset.drive_url)}
-              controls
-              autoPlay
-              className={`rounded-xl shadow-2xl border border-slate-800 object-contain ${
-                isReel ? 'h-full max-h-[85vh] aspect-[9/16]' : 'w-full max-w-4xl aspect-video'
+              title={asset.title || 'Video preview'}
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              className={`rounded-xl shadow-2xl border border-slate-800 ${
+                isReel ? 'h-full max-h-[85vh] aspect-[9/16]' : 'w-full max-w-5xl aspect-video'
               }`}
             />
           </div>
