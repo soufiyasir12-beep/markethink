@@ -18,7 +18,7 @@ const ChevronLeft  = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" he
 const ChevronRight = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
 
 /* ─────────── Reusable sub-components ─────────── */
-function Badge({ children, color = 'purple' }: { children: React.ReactNode; color?: string }) {
+function Badge({ children, color = 'purple', onClick }: { children: React.ReactNode; color?: string; onClick?: () => void }) {
   const colors: Record<string, string> = {
     purple: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
     blue:   'bg-blue-500/20 text-blue-300 border-blue-500/30',
@@ -28,7 +28,10 @@ function Badge({ children, color = 'purple' }: { children: React.ReactNode; colo
     cyan:   'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
   }
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold tracking-wide ${colors[color] ?? colors.purple}`}>
+    <span
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold tracking-wide ${colors[color] ?? colors.purple} ${onClick ? 'cursor-pointer hover:bg-emerald-500/30 hover:text-white transition-all duration-200' : ''}`}
+    >
       {children}
     </span>
   )
@@ -104,14 +107,15 @@ function SecurityItem({ icon, title, desc, delay = 0 }: { icon: string; title: s
   )
 }
 
-function TableRow({ cells, header = false, delay = 0 }: { cells: string[]; header?: boolean; delay?: number }) {
+function TableRow({ cells, header = false, delay = 0, onClick }: { cells: string[]; header?: boolean; delay?: number; onClick?: () => void }) {
   const Tag = header ? 'th' : 'td'
   return (
     <motion.tr
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay }}
-      className={header ? 'border-b border-white/10' : 'border-b border-white/5 hover:bg-white/5 transition-colors'}
+      onClick={onClick}
+      className={header ? 'border-b border-white/10' : `border-b border-white/5 ${onClick ? 'cursor-pointer hover:bg-emerald-500/15 hover:text-emerald-200' : 'hover:bg-white/5'} transition-all duration-200`}
     >
       {cells.map((c, i) => (
         <Tag key={i} className={`px-4 py-2.5 text-left text-sm ${header ? 'font-semibold text-purple-300' : 'text-slate-300'}`}>
@@ -123,7 +127,7 @@ function TableRow({ cells, header = false, delay = 0 }: { cells: string[]; heade
 }
 
 /* ─────────── SLIDES definition ─────────── */
-function useSlides(): Slide[] {
+function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slide[] {
   return [
     /* 0 ─ PORTADA */
     {
@@ -336,7 +340,7 @@ function useSlides(): Slide[] {
     {
       id: 'servicios',
       title: 'Servicios Instalados',
-      subtitle: 'Infraestructura del servidor',
+      subtitle: 'Infraestructura del servidor (haz clic en Tailscale para ver panel)',
       content: (
         <div className="space-y-4 max-w-4xl mx-auto">
           <div className="overflow-x-auto rounded-xl border border-white/10">
@@ -348,7 +352,11 @@ function useSlides(): Slide[] {
                 <TableRow delay={0.1} cells={['🐧 Ubuntu Server', '24.04 LTS', 'Sistema operativo del host en Proxmox']} />
                 <TableRow delay={0.15} cells={['🐳 Docker Engine', 'v26.1', 'Contenerización del agente OpenClaw']} />
                 <TableRow delay={0.2} cells={['🤖 OpenClaw', '2026.5.27', 'Framework agéntico de IA con sandbox']} />
-                <TableRow delay={0.25} cells={['🔗 Tailscale', 'VPN + SSH', 'Túnel privado (puerto 18789) para admin remota']} />
+                <TableRow 
+                  delay={0.25} 
+                  cells={['🔗 Tailscale 🔍', 'VPN + SSH (Clic para ver panel)', 'Túnel privado (puerto 18789) para admin remota']} 
+                  onClick={onTailscaleClick}
+                />
                 <TableRow delay={0.3} cells={['🎬 FFMPEG', 'Último estable', 'Renderizado multimedia local']} />
                 <TableRow delay={0.35} cells={['🟢 Node.js', 'v20 LTS', 'Runtime para Skills del agente']} />
                 <TableRow delay={0.4} cells={['📦 Git', 'Último', 'Control de versiones y GitOps pipeline']} />
@@ -364,7 +372,7 @@ function useSlides(): Slide[] {
             transition={{ delay: 0.6 }}
             className="flex flex-wrap gap-2 justify-center"
           >
-            <Badge color="green">Tailscale — VPN SSH remoto</Badge>
+            <Badge color="green" onClick={onTailscaleClick}>Tailscale — VPN SSH remoto 🔍</Badge>
             <Badge color="blue">Docker — Sandbox aislado</Badge>
             <Badge color="purple">OpenClaw — Orquestador IA</Badge>
             <Badge color="amber">Proxmox — Hipervisor</Badge>
@@ -1033,7 +1041,11 @@ function useSlides(): Slide[] {
 
 /* ─────────── Main presentation component ─────────── */
 export default function PresentacionPage() {
-  const slides = useSlides()
+  const [tailscaleModalOpen, setTailscaleModalOpen] = useState(false)
+
+  const slides = useSlides({
+    onTailscaleClick: () => setTailscaleModalOpen(true)
+  })
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState(0)
 
@@ -1051,6 +1063,12 @@ export default function PresentacionPage() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setTailscaleModalOpen(false)
+        return
+      }
+      if (tailscaleModalOpen) return
+
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next() }
       if (e.key === 'ArrowLeft')                    { e.preventDefault(); prev() }
       if (e.key === 'Home')                         { e.preventDefault(); goTo(0) }
@@ -1058,7 +1076,7 @@ export default function PresentacionPage() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [next, prev, goTo, slides.length])
+  }, [next, prev, goTo, slides.length, tailscaleModalOpen])
 
   const slideVariants = {
     enter: (dir: number) => ({ x: dir > 0 ? 600 : -600, opacity: 0 }),
@@ -1180,6 +1198,51 @@ export default function PresentacionPage() {
           Siguiente <ChevronRight />
         </button>
       </footer>
+
+      {/* ── Tailscale Modal ── */}
+      <AnimatePresence>
+        {tailscaleModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setTailscaleModalOpen(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md cursor-pointer"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-4xl w-full rounded-2xl border border-white/10 bg-[#0c0c22] p-6 shadow-2xl cursor-default"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setTailscaleModalOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5"
+                aria-label="Cerrar modal"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+              
+              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                <span>🔗</span> Panel de Administración de Tailscale (Tailnet)
+              </h3>
+              <p className="text-sm text-slate-400 mb-4">
+                Dispositivos autorizados en la VPN privada del proyecto. Se aprecia la máquina <code className="text-emerald-400 font-semibold">ubuntuserver</code> activa con la IP <code className="text-cyan-400 font-semibold">100.120.180.60</code>.
+              </p>
+
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-slate-950">
+                <img
+                  src="/presentacion/tailscale_panel.png"
+                  alt="Panel de administración de Tailscale"
+                  className="w-full h-auto max-h-[450px] object-contain mx-auto"
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
