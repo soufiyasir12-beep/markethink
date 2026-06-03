@@ -407,26 +407,16 @@ function useSlides({ onTailscaleClick }: { onTailscaleClick: () => void }): Slid
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-5"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="rounded-2xl border border-white/10 overflow-hidden shadow-2xl max-w-lg mx-auto"
           >
-            <p className="text-xs text-blue-400 font-semibold mb-3">💬 EJEMPLO DE USO REAL</p>
-            <div className="space-y-3">
-              <div className="flex gap-3 items-start">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-blue-500/30 flex items-center justify-center text-xs">👤</div>
-                <div className="rounded-xl rounded-tl-none bg-blue-500/10 px-4 py-2.5 text-sm text-slate-200 max-w-lg">
-                  &ldquo;Hola Claudio, quiero una campaña en la que vendamos relojes. Créame una landing page, vídeos para redes e imágenes de los productos. Usa mi avatar Carlos.&rdquo;
-                </div>
-              </div>
-              <div className="flex gap-3 items-start flex-row-reverse">
-                <div className="shrink-0 w-8 h-8 rounded-full bg-purple-500/30 flex items-center justify-center text-xs">🤖</div>
-                <div className="rounded-xl rounded-tr-none bg-purple-500/10 px-4 py-2.5 text-sm text-slate-200 max-w-lg text-right">
-                  &ldquo;¡Entendido! Generando campaña de relojes: landing page, 3 vídeos y 5 imágenes con avatar Carlos. Procesando...&rdquo;
-                </div>
-              </div>
-            </div>
+            <img
+              src="/presentacion/telegram_chat.png"
+              alt="Conversación real con el Agente Claudio en Telegram"
+              className="w-full h-auto max-h-[350px] object-contain bg-[#17212b]"
+            />
           </motion.div>
 
           <motion.div
